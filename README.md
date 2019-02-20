@@ -24,8 +24,6 @@ You need to schedule a job for downloading trailers each week. I find that once 
 
 **macOS or Linux:**
 
-Open the crontab.
-
 ```
 crontab -e
 30 3 * * fri python /path/to/scripts/download.py 2>&1
