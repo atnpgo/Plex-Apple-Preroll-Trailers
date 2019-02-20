@@ -35,7 +35,7 @@ Open the Control Panel and navigate to Administrative Tools > Task Scheduler. Th
 
 ### Mixing
 
-Open Tautulli and go to Settings > Notification Agents and add a new notification agent. The type should be "script" and you'll want to add the path to the folder the scripts are located in and select download.py as your script in the configuration tab. Be sure to add a description for the script as well. Next, go to the triggers tab and check the box for "Playback Start" and then go to the conditions tab and add a condition to only fire when "media type is movie". For the arguments tab, go to the "Playback Start" section and add the code below. After that, be sure to save it and you're all set.
+Open Tautulli and go to Settings > Notification Agents and add a new notification agent. The type should be "script" and you'll want to add the path to the folder the scripts are located in and select mix.py as your script in the configuration tab. Be sure to add a description for the script as well. Next, go to the triggers tab and check the box for "Playback Start" and then go to the conditions tab and add a condition to only fire when "media type is movie". For the arguments tab, go to the "Playback Start" section and add the code below. After that, be sure to save it and you're all set.
 
 ```
 nopythonpath
