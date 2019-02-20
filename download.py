@@ -71,7 +71,6 @@ def getUrls(page_url, res):
                 }
                 urls.append(url_info)
 
-
     # If no trailer, fall back to teaser
     if len(urls) == 0:
         for clip in film_data['clips']:
