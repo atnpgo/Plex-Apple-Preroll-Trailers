@@ -22,7 +22,7 @@ Edit the **settings.ini** file. Here you can add your url and token for Plex, re
 
 You need to schedule a job for downloading trailers each week. I find that once per week is totally sufficient if you have download_number set to a decent value like 30 in your settings.ini file.
 
-#####macOS or Linux:
+**macOS or Linux:**
 
 Open the crontab.
 
@@ -31,7 +31,7 @@ crontab -e
 30 3 * * fri python /path/to/scripts/download.py 2>&1
 ```
 
-#####Windows:
+**Windows:**
 
 Open the Control Panel and navigate to Administrative Tools > Task Scheduler. Then click "Create Basic Task Scheduler" and enter a name and description. Then set the task to run weekly and choose a day and time. For the action, choose "Start a program." For the "Program/script" add the location of your python installation (example: `C:\python27\python`). For the "Arguments" add the full path of the download.py script in double quotes (example: `"C:\Users\username\Trailers\download.py"`). Click "Finish" and you're all set.
 
