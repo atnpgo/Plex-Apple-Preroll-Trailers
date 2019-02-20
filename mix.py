@@ -1,107 +1,81 @@
-#!/usr/bin/env python
-
-# Use this script to randomly mix trailers into one video file.
-# You can use the generated video file as your pre-roll video file
-# in Plex to display trailers before each movie is played.
-# You must have ffmpeg installed in order to use this. Please see
-# <https://github.com/FFmpeg/FFmpeg>.
-#
-# This script should ideally be used in conjunction with Tautulli
-# notification agents to randomly re-mix the trailers each time a
-# movie is played. Please see <https://github.com/Tautulli/Tautulli>
-# and <https://github.com/Tautulli/Tautulli-Wiki/wiki/Custom-Scripts>
-# for more information on setting this up.
-#
-# Settings should be configured in settings.cfg.
-
-# Copyright 2018 David Engel
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-import json
-import random
-import logging
 import os
-import os.path
-from shared import validate_settings
-from shared import get_config_values
-from shared import get_settings
-from shared import get_command_line_arguments
-from shared import configure_logging
+import random
+import sys
 
+# Python 3.0 and later
 try:
-    # For Python 3.0 and later
-    from configparser import SafeConfigParser
-    from configparser import Error
-    from configparser import MissingSectionHeaderError
+    from configparser import *
+
+# Python 2.7
 except ImportError:
-    # Fall back for Python 2.7
-    from ConfigParser import SafeConfigParser
-    from ConfigParser import Error
-    from ConfigParser import MissingSectionHeaderError
+    from ConfigParser import *
 
+# Python-PlexAPI
+try:
+    from plexapi.server import PlexServer
+    
+except:
+    print('\033[91mERROR:\033[0m PlexAPI is not installed.')
+    sys.exit()
 
+# Settings
+def getSettings():
+    config = ConfigParser()
+    config.read(os.path.split(os.path.abspath(__file__))[0]+'/settings.ini')
+    return {
+        'download_number': config.get('DEFAULT', 'download_number'),
+        'mix_number': config.get('DEFAULT', 'mix_number'),
+        'plex_url': config.get('DEFAULT', 'plex_url'),
+        'plex_token': config.get('DEFAULT', 'plex_token'),
+        'feature_presentation': config.get('DEFAULT', 'feature_presentation'),
+        'download_path': os.path.split(os.path.abspath(__file__))[0]+'/Trailers'
+    }
+
+# Main
 def main():
-    # Main script
+    # Settings
+    settings = getSettings()
 
-    # Set default log level so we can log messages generated while loading the settings.
-    configure_logging('')
+    # Make sure the download path exists
+    if os.path.exists(settings['download_path']):
 
-    try:
-        settings = get_settings()
-    except MissingSectionHeaderError:
-        logging.error('Configuration file is missing a header section, ' +
-                      'try adding [DEFAULT] at the top of the file')
-        return
-    except (Error, ValueError) as ex:
-        logging.error("Configuration error: %s", ex)
-        return
+        # Selections
+        selections = []
 
-    configure_logging(settings['output_level'])
+        # Use download number if mix number > download number
+        if int(settings['mix_number']) < int(settings['download_number']):
+            number = int(settings['mix_number'])
 
-    logging.debug("Using configuration values:")
-    logging.debug("Loaded configuration from %s", settings['config_path'])
-    for name in sorted(settings):
-        if name != 'config_path':
-            logging.debug("    %s: %s", name, settings[name])
+        else:
+            number = int(settings['download_number'])
 
-    logging.debug("")
+        # Mix preroll trailers
+        try:
+            # Make random selections
+            rand = random.sample(os.listdir(settings['download_path']), number)
+            for item in rand:
+                selections.append(os.path.join(settings['download_path'], item))
 
-    # Get downloaded trailers
-    trailers = json.load(open(settings['json_file']))
+            # Add feature presentation video
+            if settings['feature_presentation'] is not None and os.path.isfile(settings['feature_presentation']):
+                selections.append(settings['feature_presentation'])
 
-    # Randomly select trailers
-    selected_trailers = random.sample(range(1,int(settings['max_trailers'])+1),int(settings['quantity']))
+            # Add selected preroll trailers to Plex
+            try:
+                plex = PlexServer(settings['plex_url'], settings['plex_token'])
+                plex_settings = plex.settings.get('CinemaTrailersPrerollID')
+                plex_settings.set(str(','.join(selections)))
+                plex.settings.save()
 
-    input_video = []
+            except:
+                print('\033[91mERROR:\033[0m Failed to connect to Plex. Check your url and token.')
 
-    for x in selected_trailers:
-        input_video.append(trailers[str(x)])
+        except ValueError as error:
+            print('\033[91mERROR:\033[0m No trailers have been downloaded yet.')
 
-    # Set selected trailers in temp file
-    with open(settings['selected_file'], "w") as f:
-        for i in input_video:
-            item = i.replace("'", "\\'")
-            f.write('file \'' + item + '\'' + os.linesep)
-    f.close
+    else:
+        print('\033[91mERROR:\033[0m No trailers have been downloaded yet.')
 
-    # Convert selected trailers into one video
-    os.system(settings['ffmpeg_path']+' -loglevel panic -y -f concat -safe 0 -i '+settings['selected_file']+' -c copy '+settings['output_file'])
-
-    # Remove temp file
-    os.remove(settings['selected_file'])
-
-# Run the script
+# Run
 if __name__ == '__main__':
     main()
