@@ -13,7 +13,7 @@ except ImportError:
 # Python-PlexAPI
 try:
     from plexapi.server import PlexServer
-    
+
 except:
     print('\033[91mERROR:\033[0m PlexAPI is not installed.')
     sys.exit()
@@ -42,18 +42,10 @@ def main():
         # Selections
         selections = []
 
-        # Use download number if mix number > download number
-        if int(settings['mix_number']) < int(settings['download_number']):
-            number = int(settings['mix_number'])
-
-        else:
-            number = int(settings['download_number'])
-
         # Mix preroll trailers
         try:
             # Make random selections
-            rand = random.sample(os.listdir(settings['download_path']), number)
-            for item in rand:
+            for item in random.sample(os.listdir(settings['download_path']), int(settings['mix_number'])):
                 selections.append(os.path.join(settings['download_path'], item))
 
             # Add feature presentation video

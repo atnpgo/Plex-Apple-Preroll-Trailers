@@ -20,7 +20,7 @@ Edit the **settings.ini** file. Here you can add your url and token for Plex, re
 
 ### Downloads
 
-You need to schedule a job for downloading trailers each week. I find that once per week is totally sufficient if you have download_number set to a decent value like 30 in your settings.ini file.
+You need to schedule a job for downloading trailers each week. I find that once per week is totally sufficient if you have download_number set to a decent value like 40 in your settings.ini file.
 
 **macOS or Linux:**
 

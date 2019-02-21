@@ -141,8 +141,7 @@ def appleDownload(page_url, res, destdir, filename):
 
 # Search Apple
 def searchApple():
-    search_url = 'https://trailers.apple.com/itunes/us/json/most_pop.json'
-    return loadJson(search_url)
+    return loadJson('https://trailers.apple.com/trailers/home/feeds/most_pop.json')
 
 # Delete old files
 def deleteOldFiles(destdir, downloads):
@@ -162,38 +161,17 @@ def main():
     # Search Apple for trailers
     search = searchApple()
 
-    # Queue
-    queue = []
-
     # Downloads
     downloads = []
 
-    # Iterate over search results and prepare queue
-    count = 0
-    while len(queue) < int(settings['download_number']) and count < 25:
-
-        # Box office
-        if search['items'][1]['thumbnails'][count] != None and len(queue) < int(settings['download_number']):
-            item = {'title': search['items'][1]['thumbnails'][count]['title'], 'url': search['items'][1]['thumbnails'][count]['url'],}
-            if item not in queue :
-                queue.append(item)
-
-        # Most popular
-        if search['items'][0]['thumbnails'][count] != None and len(queue) < int(settings['download_number']):
-            item = {'title': search['items'][0]['thumbnails'][count]['title'], 'url': search['items'][0]['thumbnails'][count]['url'],}
-            if item not in queue :
-                queue.append(item)
-
-        count += 1
-
-    # Iterate over queue and download
-    for item in queue:
+    # Iterate over search results and download
+    for item in search:
 
         # Make sure file has not already been downloaded
         if not os.path.exists(settings['download_path']+'/'+removeSpecialChars(item['title'])+' (Trailer).mp4'):
 
             # Download
-            file = appleDownload('https://trailers.apple.com'+item['url'], settings['resolution'], settings['download_path'], removeSpecialChars(item['title'])+' (Trailer).mp4')
+            file = appleDownload('https://trailers.apple.com'+item['location'], settings['resolution'], settings['download_path'], removeSpecialChars(item['title'])+' (Trailer).mp4')
 
             # Add to download count
             if file:
@@ -202,6 +180,9 @@ def main():
         # Add to download count
         else:
             downloads.append(settings['download_path']+'/'+removeSpecialChars(item['title'])+' (Trailer).mp4')
+
+        if len(downloads) >= int(settings['download_number']):
+            break
 
     # Delete old trailers
     deleteOldFiles(settings['download_path'], downloads)
@@ -212,18 +193,10 @@ def main():
         # Selections
         selections = []
 
-        # Use download number if mix number > download number
-        if int(settings['mix_number']) < int(settings['download_number']):
-            number = int(settings['mix_number'])
-
-        else:
-            number = int(settings['download_number'])
-
         # Mix preroll trailers
         try:
             # Make random selections
-            rand = random.sample(os.listdir(settings['download_path']), number)
-            for item in rand:
+            for item in random.sample(os.listdir(settings['download_path']), int(settings['mix_number'])):
                 selections.append(os.path.join(settings['download_path'], item))
 
             # Add feature presentation video
