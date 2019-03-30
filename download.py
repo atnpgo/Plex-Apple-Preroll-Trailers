@@ -135,7 +135,6 @@ def appleDownload(page_url, res, destdir, filename):
 def searchApple():
     # Fetch from sources
     just_added = loadJson('https://trailers.apple.com/trailers/home/feeds/just_added.json')
-    most_popular = loadJson('https://trailers.apple.com/trailers/home/feeds/most_pop.json')
     box_office = loadJson('https://trailers.apple.com/trailers/home/feeds/popular/most_pop.json')['items'][1]['thumbnails']
     opening = loadJson('https://trailers.apple.com/trailers/home/feeds/opening.json')['items'][0]['thumbnails']
     # Combine sources
@@ -145,9 +144,6 @@ def searchApple():
         if count <= len(just_added) - 1:
             just_added[count]['location'] = 'https://trailers.apple.com'+just_added[count]['location']
             results.append(just_added[count])
-        if count <= len(most_popular) - 1:
-            most_popular[count]['location'] = 'https://trailers.apple.com'+most_popular[count]['location']
-            results.append(most_popular[count])
         if count <= len(box_office) - 1:
             box_office[count]['location'] = box_office[count]['url']
             results.append(box_office[count])
