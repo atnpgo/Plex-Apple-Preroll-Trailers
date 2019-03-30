@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 import json
 import os
 import random
@@ -23,6 +24,14 @@ try:
 except:
     print('\033[91mERROR:\033[0m PlexAPI is not installed.')
     sys.exit()
+
+# Arguments
+def getArguments():
+    name = 'Plex-Apple-Preroll-Trailers'
+    version = '2.01'
+    parser = ArgumentParser(description='{}: download upcoming trailers from Apple and mix them for Plex'.format(name))
+    parser.add_argument("-v", "--version", action='version', version='{} {}'.format(name, version), help="show the version number and exit")
+    args = parser.parse_args()
 
 # Settings
 def getSettings():
@@ -71,28 +80,11 @@ def getUrls(page_url, res):
                 }
                 urls.append(url_info)
 
-    # If no trailer, fall back to teaser
-    if len(urls) == 0:
-        for clip in film_data['clips']:
-            video_type = clip['title']
-            if apple_size in clip['versions']['enus']['sizes']:
-                file_info = clip['versions']['enus']['sizes'][apple_size]
-                file_url = convertUrl(file_info['src'], res)
-                video_type = video_type.lower()
-                if (video_type.startswith('teaser')):
-                    url_info = {
-                        'res': res,
-                        'title': title,
-                        'type': video_type,
-                        'url': file_url,
-                    }
-                    urls.append(url_info)
-
     final = []
-    length = len(urls)
 
-    if length > 1:
-        final.append(urls[length-1])
+    if len(urls) > 1:
+        # Use newest trailer
+        final.append(urls[0])
         return final
     else:
         return urls
@@ -141,7 +133,29 @@ def appleDownload(page_url, res, destdir, filename):
 
 # Search Apple
 def searchApple():
-    return loadJson('https://trailers.apple.com/trailers/home/feeds/most_pop.json')
+    # Fetch from sources
+    just_added = loadJson('https://trailers.apple.com/trailers/home/feeds/just_added.json')
+    most_popular = loadJson('https://trailers.apple.com/trailers/home/feeds/most_pop.json')
+    box_office = loadJson('https://trailers.apple.com/trailers/home/feeds/popular/most_pop.json')['items'][1]['thumbnails']
+    opening = loadJson('https://trailers.apple.com/trailers/home/feeds/opening.json')['items'][0]['thumbnails']
+    # Combine sources
+    results = []
+    count = 0
+    while count <= len(just_added) - 1:
+        if count <= len(just_added) - 1:
+            just_added[count]['location'] = 'https://trailers.apple.com'+just_added[count]['location']
+            results.append(just_added[count])
+        if count <= len(most_popular) - 1:
+            most_popular[count]['location'] = 'https://trailers.apple.com'+most_popular[count]['location']
+            results.append(most_popular[count])
+        if count <= len(box_office) - 1:
+            box_office[count]['location'] = box_office[count]['url']
+            results.append(box_office[count])
+        if count <= len(opening) - 1:
+            opening[count]['location'] = opening[count]['url']
+            results.append(opening[count])
+        count += 1
+    return results
 
 # Delete old files
 def deleteOldFiles(destdir, downloads):
@@ -155,6 +169,9 @@ def deleteOldFiles(destdir, downloads):
 
 # Main
 def main():
+    # Arguments
+    arguments = getArguments()
+
     # Settings
     settings = getSettings()
 
@@ -171,7 +188,7 @@ def main():
         if not os.path.exists(settings['download_path']+'/'+removeSpecialChars(item['title'])+' (Trailer).mp4'):
 
             # Download
-            file = appleDownload('https://trailers.apple.com'+item['location'], settings['resolution'], settings['download_path'], removeSpecialChars(item['title'])+' (Trailer).mp4')
+            file = appleDownload(item['location'], settings['resolution'], settings['download_path'], removeSpecialChars(item['title'])+' (Trailer).mp4')
 
             # Add to download count
             if file:
