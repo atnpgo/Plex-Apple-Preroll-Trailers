@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 import os
 import random
 import sys
@@ -18,6 +19,14 @@ except:
     print('\033[91mERROR:\033[0m PlexAPI is not installed.')
     sys.exit()
 
+# Arguments
+def getArguments():
+    name = 'Plex-Apple-Preroll-Trailers'
+    version = '2.01'
+    parser = ArgumentParser(description='{}: mix upcoming trailers for Plex'.format(name))
+    parser.add_argument("-v", "--version", action='version', version='{} {}'.format(name, version), help="show the version number and exit")
+    args = parser.parse_args()
+
 # Settings
 def getSettings():
     config = ConfigParser()
@@ -33,6 +42,9 @@ def getSettings():
 
 # Main
 def main():
+    # Arguments
+    arguments = getArguments()
+
     # Settings
     settings = getSettings()
 
