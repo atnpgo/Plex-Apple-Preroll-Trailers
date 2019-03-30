@@ -139,17 +139,21 @@ def searchApple():
     opening = loadJson('https://trailers.apple.com/trailers/home/feeds/opening.json')['items'][0]['thumbnails']
     # Combine sources
     results = []
+    selections = []
     count = 0
     while count <= len(just_added) - 1:
-        if count <= len(just_added) - 1:
+        if count <= len(just_added) - 1 and just_added[count]['title'] not in selections:
             just_added[count]['location'] = 'https://trailers.apple.com'+just_added[count]['location']
             results.append(just_added[count])
-        if count <= len(box_office) - 1:
+            selections.append(just_added[count]['title'])
+        if count <= len(box_office) - 1 and box_office[count]['title'] not in selections:
             box_office[count]['location'] = box_office[count]['url']
             results.append(box_office[count])
-        if count <= len(opening) - 1:
+            selections.append(box_office[count]['title'])
+        if count <= len(opening) - 1 and opening[count]['title'] not in selections:
             opening[count]['location'] = opening[count]['url']
             results.append(opening[count])
+            selections.append(opening[count]['title'])
         count += 1
     return results
 
