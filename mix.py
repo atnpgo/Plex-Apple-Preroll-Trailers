@@ -37,6 +37,7 @@ def getSettings():
         'plex_url': config.get('DEFAULT', 'plex_url'),
         'plex_token': config.get('DEFAULT', 'plex_token'),
         'feature_presentation': config.get('DEFAULT', 'feature_presentation'),
+        'trailer_folder_path': config.get('DEFAULT', 'trailer_folder_path'),
         'download_path': os.path.split(os.path.abspath(__file__))[0]+'/Trailers'
     }
 
@@ -56,9 +57,15 @@ def main():
 
         # Mix preroll trailers
         try:
+            # Determine path of trailers folder
+            if settings['trailer_folder_path'] is not None:
+                trailer_path = settings['trailer_folder_path']
+            else:
+                trailer_path = settings['download_path']
+
             # Make random selections
             for item in random.sample(os.listdir(settings['download_path']), int(settings['mix_number'])):
-                selections.append(os.path.join(settings['download_path'], item))
+                selections.append(trailer_path+'/'+item)
 
             # Add feature presentation video
             if settings['feature_presentation'] is not None and os.path.isfile(settings['feature_presentation']):
