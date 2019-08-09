@@ -28,7 +28,7 @@ except:
 # Arguments
 def getArguments():
     name = 'Plex-Apple-Preroll-Trailers'
-    version = '2.02'
+    version = '2.03'
     parser = ArgumentParser(description='{}: download upcoming trailers from Apple and mix them for Plex'.format(name))
     parser.add_argument("-v", "--version", action='version', version='{} {}'.format(name, version), help="show the version number and exit")
     args = parser.parse_args()
