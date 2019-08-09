@@ -148,7 +148,7 @@ def searchApple():
             results.append(just_added[count])
             selections.append(just_added[count]['title'])
         if count <= len(box_office) - 1 and box_office[count]['title'] not in selections:
-            box_office[count]['location'] = 'https://trailers.apple.com'+box_office[count]['url']
+            box_office[count]['location'] = box_office[count]['url']
             results.append(box_office[count])
             selections.append(box_office[count]['title'])
         if count <= len(opening) - 1 and opening[count]['title'] not in selections:
