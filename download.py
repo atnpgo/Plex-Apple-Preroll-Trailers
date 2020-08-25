@@ -1,42 +1,27 @@
-from argparse import ArgumentParser
 import json
 import os
-import random
 import shutil
 import socket
 import sys
 
-# Python 3.0 and later
-try:
-    from configparser import *
-    from urllib.request import *
-    from urllib.error import *
+from mix import mix
 
-# Python 2.7
-except ImportError:
-    from ConfigParser import *
-    from urllib2 import *
+from configparser import *
+from urllib.request import *
+from urllib.error import *
 
 # Python-PlexAPI
 try:
     from plexapi.server import PlexServer
-
 except:
     print('\033[91mERROR:\033[0m PlexAPI is not installed.')
     sys.exit()
 
-# Arguments
-def getArguments():
-    name = 'Plex-Apple-Preroll-Trailers'
-    version = '2.03'
-    parser = ArgumentParser(description='{}: download upcoming trailers from Apple and mix them for Plex'.format(name))
-    parser.add_argument("-v", "--version", action='version', version='{} {}'.format(name, version), help="show the version number and exit")
-    args = parser.parse_args()
 
 # Settings
 def getSettings():
     config = ConfigParser()
-    config.read(os.path.split(os.path.abspath(__file__))[0]+'/settings.ini')
+    config.read(os.path.split(os.path.abspath(__file__))[0] + '/settings.ini')
     return {
         'resolution': config.get('DEFAULT', 'resolution'),
         'download_number': config.get('DEFAULT', 'download_number'),
@@ -45,18 +30,22 @@ def getSettings():
         'plex_token': config.get('DEFAULT', 'plex_token'),
         'feature_presentation': config.get('DEFAULT', 'feature_presentation'),
         'trailer_folder_path': config.get('DEFAULT', 'trailer_folder_path'),
-        'download_path': os.path.split(os.path.abspath(__file__))[0]+'/Trailers'
+        'download_path': os.path.split(os.path.abspath(__file__))[0] + '/Trailers'
     }
+
 
 # Remove special characters
 def removeSpecialChars(string):
-    return string.replace('/', '').replace('\\', '').replace(':', '').replace('*', '').replace('?', '').replace('"', "'").replace('<', '').replace('>', '').replace(',', '').replace('|', '')
+    return string.replace('/', '').replace('\\', '').replace(':', '').replace('*', '').replace('?', '').replace('"', "'") \
+        .replace('<', '').replace('>', '').replace(',', '').replace('|', '')
+
 
 # Load json from url
 def loadJson(url):
     response = urlopen(url)
     str_response = response.read().decode('utf-8')
     return json.loads(str_response)
+
 
 # Get file urls
 def getUrls(page_url, res):
@@ -90,6 +79,7 @@ def getUrls(page_url, res):
     else:
         return urls
 
+
 # Map resolution
 def mapRes(res):
     res_mapping = {'480': u'sd', '720': u'hd720', '1080': u'hd1080'}
@@ -98,11 +88,13 @@ def mapRes(res):
         raise ValueError("Invalid resolution. Valid values: %s" % res_string)
     return res_mapping[res]
 
+
 # Convert source url to file url
 def convertUrl(src_url, res):
     src_ending = "_%sp.mov" % res
     file_ending = "_h%sp.mov" % res
     return src_url.replace(src_ending, file_ending)
+
 
 # Download the file
 def downloadFile(url, destdir, filename):
@@ -120,10 +112,11 @@ def downloadFile(url, destdir, filename):
     try:
         if not os.path.exists(destdir):
             os.makedirs(destdir)
-        with open(destdir+'/'+filename, 'wb') as local_file_handle:
+        with open(destdir + '/' + filename, 'wb') as local_file_handle:
             shutil.copyfileobj(server_file_handle, local_file_handle, chunk_size)
     except socket.error as error:
         return
+
 
 # Download from Apple
 def appleDownload(page_url, res, destdir, filename):
@@ -131,6 +124,7 @@ def appleDownload(page_url, res, destdir, filename):
     for trailer_url in trailer_urls:
         downloadFile(trailer_url['url'], destdir, filename)
         return filename
+
 
 # Search Apple
 def searchApple():
@@ -144,7 +138,7 @@ def searchApple():
     count = 0
     while count <= len(just_added) - 1:
         if count <= len(just_added) - 1 and just_added[count]['title'] not in selections:
-            just_added[count]['location'] = 'https://trailers.apple.com'+just_added[count]['location']
+            just_added[count]['location'] = 'https://trailers.apple.com' + just_added[count]['location']
             results.append(just_added[count])
             selections.append(just_added[count]['title'])
         if count <= len(box_office) - 1 and box_office[count]['title'] not in selections:
@@ -152,27 +146,26 @@ def searchApple():
             results.append(box_office[count])
             selections.append(box_office[count]['title'])
         if count <= len(opening) - 1 and opening[count]['title'] not in selections:
-            opening[count]['location'] = 'https://trailers.apple.com'+opening[count]['url']
+            opening[count]['location'] = 'https://trailers.apple.com' + opening[count]['url']
             results.append(opening[count])
             selections.append(opening[count]['title'])
         count += 1
     return results
+
 
 # Delete old files
 def deleteOldFiles(destdir, downloads):
     # Iterate through downloaded files
     for item in os.listdir(destdir):
         # Make sure the item is a file
-        if os.path.isfile(destdir+'/'+item):
+        if os.path.isfile(destdir + '/' + item):
             # Delete any file that wasn't just downloaded
-            if destdir+'/'+item not in downloads:
-                os.remove(destdir+'/'+item)
+            if destdir + '/' + item not in downloads:
+                os.remove(destdir + '/' + item)
+
 
 # Main
 def main():
-    # Arguments
-    arguments = getArguments()
-
     # Settings
     settings = getSettings()
 
@@ -186,62 +179,26 @@ def main():
     for item in search:
 
         # Make sure file has not already been downloaded
-        if not os.path.exists(settings['download_path']+'/'+removeSpecialChars(item['title'])+' (Trailer).mp4'):
+        if not os.path.exists(settings['download_path'] + '/' + removeSpecialChars(item['title']) + ' (Trailer).mp4'):
 
             # Download
-            file = appleDownload(item['location'], settings['resolution'], settings['download_path'], removeSpecialChars(item['title'])+' (Trailer).mp4')
+            file = appleDownload(item['location'], settings['resolution'], settings['download_path'], removeSpecialChars(item['title']) + ' (Trailer).mp4')
 
             # Add to download count
             if file:
-                downloads.append(settings['download_path']+'/'+file)
+                downloads.append(settings['download_path'] + '/' + file)
 
         # Add to download count
         else:
-            downloads.append(settings['download_path']+'/'+removeSpecialChars(item['title'])+' (Trailer).mp4')
+            downloads.append(settings['download_path'] + '/' + removeSpecialChars(item['title']) + ' (Trailer).mp4')
 
         if len(downloads) >= int(settings['download_number']):
             break
 
     # Delete old trailers
     deleteOldFiles(settings['download_path'], downloads)
+    mix()
 
-    # Make sure the download path exists
-    if os.path.exists(settings['download_path']):
-
-        # Selections
-        selections = []
-
-        # Mix preroll trailers
-        try:
-            # Determine path of trailers folder
-            if settings['trailer_folder_path'] is not None:
-                trailer_path = settings['trailer_folder_path']
-            else:
-                trailer_path = settings['download_path']
-
-            # Make random selections
-            for item in random.sample(os.listdir(settings['download_path']), int(settings['mix_number'])):
-                selections.append(trailer_path+'/'+item)
-
-            # Add feature presentation video
-            if settings['feature_presentation'] is not None and os.path.isfile(settings['feature_presentation']):
-                selections.append(settings['feature_presentation'])
-
-            # Add selected preroll trailers to Plex
-            try:
-                plex = PlexServer(settings['plex_url'], settings['plex_token'])
-                plex_settings = plex.settings.get('CinemaTrailersPrerollID')
-                plex_settings.set(str(','.join(selections)))
-                plex.settings.save()
-
-            except:
-                print('\033[91mERROR:\033[0m Failed to connect to Plex. Check your url and token.')
-
-        except ValueError as error:
-            print('\033[91mERROR:\033[0m No trailers have been downloaded yet.')
-
-    else:
-        print('\033[91mERROR:\033[0m No trailers have been downloaded yet.')
 
 # Run
 if __name__ == '__main__':

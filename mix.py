@@ -1,15 +1,7 @@
-from argparse import ArgumentParser
 import os
 import random
 import sys
-
-# Python 3.0 and later
-try:
-    from configparser import *
-
-# Python 2.7
-except ImportError:
-    from ConfigParser import *
+from configparser import *
 
 # Python-PlexAPI
 try:
@@ -19,33 +11,25 @@ except:
     print('\033[91mERROR:\033[0m PlexAPI is not installed.')
     sys.exit()
 
-# Arguments
-def getArguments():
-    name = 'Plex-Apple-Preroll-Trailers'
-    version = '2.03'
-    parser = ArgumentParser(description='{}: mix upcoming trailers for Plex'.format(name))
-    parser.add_argument("-v", "--version", action='version', version='{} {}'.format(name, version), help="show the version number and exit")
-    args = parser.parse_args()
 
 # Settings
 def getSettings():
     config = ConfigParser()
-    config.read(os.path.split(os.path.abspath(__file__))[0]+'/settings.ini')
+    config.read(os.path.split(os.path.abspath(__file__))[0] + '/settings.ini')
     return {
         'download_number': config.get('DEFAULT', 'download_number'),
         'mix_number': config.get('DEFAULT', 'mix_number'),
         'plex_url': config.get('DEFAULT', 'plex_url'),
         'plex_token': config.get('DEFAULT', 'plex_token'),
-        'feature_presentation': config.get('DEFAULT', 'feature_presentation'),
         'trailer_folder_path': config.get('DEFAULT', 'trailer_folder_path'),
-        'download_path': os.path.split(os.path.abspath(__file__))[0]+'/Trailers'
+        'feature_presentation_path': config.get('DEFAULT', 'feature_presentation_path'),
+        'intros_path': config.get('DEFAULT', 'intros_path'),
+        'trivia_video_path': config.get('DEFAULT', 'trivia_video_path'),
+        'download_path': os.path.split(os.path.abspath(__file__))[0] + '/Trailers'
     }
 
-# Main
-def main():
-    # Arguments
-    arguments = getArguments()
 
+def mix():
     # Settings
     settings = getSettings()
 
@@ -57,19 +41,21 @@ def main():
 
         # Mix preroll trailers
         try:
-            # Determine path of trailers folder
-            if settings['trailer_folder_path'] is not None:
-                trailer_path = settings['trailer_folder_path']
-            else:
-                trailer_path = settings['download_path']
+            if settings['trivia_video_path'] is not None and os.path.isfile(settings['trivia_video_path']):
+                selections.append(settings['trivia_video_path'])
+
+            if os.path.exists(settings['intros_path']):
+                for item in random.sample(os.listdir(settings['intros_path']), 1):
+                    selections.append(settings['intros_path'] + '/' + item)
 
             # Make random selections
             for item in random.sample(os.listdir(settings['download_path']), int(settings['mix_number'])):
-                selections.append(trailer_path+'/'+item)
+                selections.append(settings['download_path'] + '/' + item)
 
             # Add feature presentation video
-            if settings['feature_presentation'] is not None and os.path.isfile(settings['feature_presentation']):
-                selections.append(settings['feature_presentation'])
+            if os.path.exists(settings['feature_presentation_path']):
+                for item in random.sample(os.listdir(settings['feature_presentation_path']), 1):
+                    selections.append(settings['feature_presentation_path'] + '/' + item)
 
             # Add selected preroll trailers to Plex
             try:
@@ -86,6 +72,12 @@ def main():
 
     else:
         print('\033[91mERROR:\033[0m No trailers have been downloaded yet.')
+
+
+# Main
+def main():
+    mix()
+
 
 # Run
 if __name__ == '__main__':
