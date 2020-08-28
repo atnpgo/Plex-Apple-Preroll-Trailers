@@ -5,8 +5,8 @@ import socket
 import sys
 
 from mix import mix
+from mix import getSettings
 
-from configparser import *
 from urllib.request import *
 from urllib.error import *
 
@@ -16,23 +16,6 @@ try:
 except:
     print('\033[91mERROR:\033[0m PlexAPI is not installed.')
     sys.exit()
-
-
-# Settings
-def getSettings():
-    config = ConfigParser()
-    config.read(os.path.split(os.path.abspath(__file__))[0] + '/settings.ini')
-    return {
-        'resolution': config.get('DEFAULT', 'resolution'),
-        'download_number': config.get('DEFAULT', 'download_number'),
-        'mix_number': config.get('DEFAULT', 'mix_number'),
-        'plex_url': config.get('DEFAULT', 'plex_url'),
-        'plex_token': config.get('DEFAULT', 'plex_token'),
-        'feature_presentation': config.get('DEFAULT', 'feature_presentation'),
-        'trailer_folder_path': config.get('DEFAULT', 'trailer_folder_path'),
-        'download_path': os.path.split(os.path.abspath(__file__))[0] + '/Trailers'
-    }
-
 
 # Remove special characters
 def removeSpecialChars(string):

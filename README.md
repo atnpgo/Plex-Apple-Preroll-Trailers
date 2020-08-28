@@ -1,4 +1,4 @@
-# Plex-Apple-Preroll-Trailers
+# Plex-Cinema-Experience-Preroll
 A set of python scripts for downloading upcoming trailers from Apple, randomly mixing them each time a movie is played, and playing them before movies in Plex as preroll trailers.
 
 Forked and modified from [Plex-Apple-Preroll-Trailers](https://github.com/airship-david/Plex-Apple-Preroll-Trailers) to whom most of the credit belongs.
@@ -12,15 +12,24 @@ You will need to install these yourself but the installations should be fairly s
 * [PlexAPI](https://github.com/pkkid/python-plexapi)
 
 * [Tautulli](https://github.com/Tautulli/Tautulli) for automatically mixing trailers
-    - If using the mac OS version, I recommend avoiding the .pkg installer since it bundles it's own version of python. 
+    - If using the mac OS version, I recommend avoiding the .pkg installer since it bundles it's own version of python which makes installing PlexAPI more difficult. 
 
 
 ## Settings
-Edit the **settings.ini** file. Here you can add your url and token for Plex, resolution settings, number of trailers to download, number of trailers to mix, an optional feature presentation video folder, an optional intro video, and an optional pre-roll trivia video.
+Edit the **settings.ini** file. Here you can add your url and token for Plex, resolution settings, number of trailers to download, number of trailers to mix, and several optional video steps.
 
-* `feature_presentation_path` a path to a folder containing one or more feature presentation video. If present, a random video in the folder will be played after the trailers but before the movie. 
-* `intros_path` a path to a folder containing one or more intro video. If present, a random video in the folder will be played right before the trailers.
-* `trivia_video_path` a path to a trivia style video to be played before the intro video, similar to the slideshows shown in movie theatres before the trailers start. See my [PlexScripts](https://github.com/atnpgo/PlexScripts) repo, more specifically the `trivia-gen.sh`, `slide-to-vid.sh` and `slide-merger.sh` scripts, to see how to create your own.
+For each of these values, you can point to either a directory or a file. If pointing to a file, that file will be played every time. If pointing to a folder, a random video will be played from that folder. 
+
+* `trivia_intro` 
+* `trivia` 
+    * Plays a trivia video before trailers start like often seen in movie theatres. See my [PlexScripts](https://github.com/atnpgo/PlexScripts) repo, more specifically the `trivia-gen.sh`, `slide-to-vid.sh` and `slide-merger.sh` scripts, to see how to create your own.
+* `trivia_outro` 
+* `theatre_intro` 
+* `trailers_intro` 
+* `sponsor_intro` 
+* `sponsor` 
+* `countdown` 
+* `feature_presentation` 
 
 ## Usage
 
@@ -46,6 +55,35 @@ Open Tautulli and go to Settings > Notification Agents and add a new notificatio
 ```
 nopythonpath
 ```
+
+### Config
+
+This is the order in which the video steps will be played:
+
+01. Trivia Intro
+    * Plays a video from the `trivia_intro` config 
+02. Trivia
+    * Plays a video from the `trivia` config
+03. Trivia Outro
+    * Plays a video from the `trivia_outro` config
+04. Theater Intro
+    * Plays a video from the `theatre_intro` config
+05. Trailers Intro
+    * Plays a video from the `trailers_intro` config
+06. Trailers
+    * Plays `X` videos downloaded from the trailers website where `X` is the number specified in the `mix_number` config
+07. Sponsor Intro
+    * Plays a video from the `sponsor_intro` config
+08. Sponsor
+    * Plays a video from the `sponsor` config
+09. Countdown Video
+    * Plays a video from the `countdown` config
+10. Feature Presentation Intro
+    * Plays a video from the `feature_presentation` config
+11. Feature Presentation
+    * The film you selected to play
+    
+All steps except `Trailers` and `Feature Presentation` are optional. Simply leave the config value blank. 
 
 ## Running For The First Time
 

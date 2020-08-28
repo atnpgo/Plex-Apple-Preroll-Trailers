@@ -3,10 +3,26 @@ import random
 import sys
 from configparser import *
 
-# Python-PlexAPI
+TRIVIA_INTRO = 'trivia_intro'
+TRIVIA = 'trivia'
+TRIVIA_OUTRO = 'trivia_outro'
+THEATRE_INTRO = 'theatre_intro'
+TRAILERS_INTRO = 'trailers_intro'
+SPONSOR_INTRO = 'sponsor_intro'
+SPONSOR = 'sponsor'
+COUNTDOWN = 'countdown'
+FEATURE_PRESENTATION = 'feature_presentation'
+
+DOWNLOAD_PATH = 'download_path'
+DEFAULT = 'DEFAULT'
+DOWNLOAD_NUMBER = 'download_number'
+MIX_NUMBER = 'mix_number'
+PLEX_URL = 'plex_url'
+PLEX_TOKEN = 'plex_token'
+TRAILER_FOLDER_PATH = 'trailer_folder_path'
+
 try:
     from plexapi.server import PlexServer
-
 except:
     print('\033[91mERROR:\033[0m PlexAPI is not installed.')
     sys.exit()
@@ -17,16 +33,30 @@ def getSettings():
     config = ConfigParser()
     config.read(os.path.split(os.path.abspath(__file__))[0] + '/settings.ini')
     return {
-        'download_number': config.get('DEFAULT', 'download_number'),
-        'mix_number': config.get('DEFAULT', 'mix_number'),
-        'plex_url': config.get('DEFAULT', 'plex_url'),
-        'plex_token': config.get('DEFAULT', 'plex_token'),
-        'trailer_folder_path': config.get('DEFAULT', 'trailer_folder_path'),
-        'feature_presentation_path': config.get('DEFAULT', 'feature_presentation_path'),
-        'intros_path': config.get('DEFAULT', 'intros_path'),
-        'trivia_video_path': config.get('DEFAULT', 'trivia_video_path'),
-        'download_path': os.path.split(os.path.abspath(__file__))[0] + '/Trailers'
+        DOWNLOAD_NUMBER: config.get(DEFAULT, DOWNLOAD_NUMBER),
+        MIX_NUMBER: config.get(DEFAULT, MIX_NUMBER),
+        PLEX_URL: config.get(DEFAULT, PLEX_URL),
+        PLEX_TOKEN: config.get(DEFAULT, PLEX_TOKEN),
+        TRAILER_FOLDER_PATH: config.get(DEFAULT, TRAILER_FOLDER_PATH),
+        DOWNLOAD_PATH: os.path.split(os.path.abspath(__file__))[0] + '/trailers',
+
+        TRIVIA_INTRO: config.get(DEFAULT, TRIVIA_INTRO),
+        TRIVIA: config.get(DEFAULT, TRIVIA),
+        TRIVIA_OUTRO: config.get(DEFAULT, TRIVIA_OUTRO),
+        THEATRE_INTRO: config.get(DEFAULT, THEATRE_INTRO),
+        TRAILERS_INTRO: config.get(DEFAULT, TRAILERS_INTRO),
+        COUNTDOWN: config.get(DEFAULT, COUNTDOWN),
+        FEATURE_PRESENTATION: config.get(DEFAULT, FEATURE_PRESENTATION)
     }
+
+
+def addItems(selections, settings, key, count=1):
+    if settings[key] is not None:
+        if os.path.isfile(settings[key]):
+            selections.append(settings[key])
+        elif os.path.isdir(settings[key]):
+            for item in random.sample(os.listdir(settings[key]), count):
+                selections.append(settings[key] + '/' + item)
 
 
 def mix():
@@ -34,32 +64,26 @@ def mix():
     settings = getSettings()
 
     # Make sure the download path exists
-    if os.path.exists(settings['download_path']):
+    if os.path.exists(settings[DOWNLOAD_PATH]):
 
         # Selections
         selections = []
 
         # Mix preroll trailers
         try:
-            if settings['trivia_video_path'] is not None and os.path.isfile(settings['trivia_video_path']):
-                selections.append(settings['trivia_video_path'])
-
-            if os.path.exists(settings['intros_path']):
-                for item in random.sample(os.listdir(settings['intros_path']), 1):
-                    selections.append(settings['intros_path'] + '/' + item)
-
-            # Make random selections
-            for item in random.sample(os.listdir(settings['download_path']), int(settings['mix_number'])):
-                selections.append(settings['download_path'] + '/' + item)
-
-            # Add feature presentation video
-            if os.path.exists(settings['feature_presentation_path']):
-                for item in random.sample(os.listdir(settings['feature_presentation_path']), 1):
-                    selections.append(settings['feature_presentation_path'] + '/' + item)
+            addItems(selections, settings, TRIVIA_INTRO)
+            addItems(selections, settings, TRIVIA)
+            addItems(selections, settings, TRIVIA_OUTRO)
+            addItems(selections, settings, THEATRE_INTRO)
+            addItems(selections, settings, TRAILERS_INTRO)
+            addItems(selections, settings, DOWNLOAD_PATH, int(settings[MIX_NUMBER]))  # add trailers
+            addItems(selections, settings, SPONSOR_INTRO)
+            addItems(selections, settings, SPONSOR)
+            addItems(selections, settings, FEATURE_PRESENTATION)
 
             # Add selected preroll trailers to Plex
             try:
-                plex = PlexServer(settings['plex_url'], settings['plex_token'])
+                plex = PlexServer(settings[PLEX_URL], settings[PLEX_TOKEN])
                 plex_settings = plex.settings.get('CinemaTrailersPrerollID')
                 plex_settings.set(str(','.join(selections)))
                 plex.settings.save()
