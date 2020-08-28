@@ -83,7 +83,6 @@ def mix():
             addItems(selections, settings, SPONSOR)
             addItems(selections, settings, FEATURE_PRESENTATION)
 
-            print(str(','.join(selections)))
             # Add selected preroll trailers to Plex
             try:
                 plex = PlexServer(settings[PLEX_URL], settings[PLEX_TOKEN])
