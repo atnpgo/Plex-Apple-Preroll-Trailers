@@ -1,3 +1,4 @@
+import glob
 import os
 import random
 import sys
@@ -37,16 +38,18 @@ def getSettings():
         MIX_NUMBER: config.get(DEFAULT, MIX_NUMBER),
         PLEX_URL: config.get(DEFAULT, PLEX_URL),
         PLEX_TOKEN: config.get(DEFAULT, PLEX_TOKEN),
-        TRAILER_FOLDER_PATH: config.get(DEFAULT, TRAILER_FOLDER_PATH),
-        DOWNLOAD_PATH: os.path.split(os.path.abspath(__file__))[0] + '/trailers',
 
-        TRIVIA_INTRO: config.get(DEFAULT, TRIVIA_INTRO),
+        TRAILER_FOLDER_PATH: os.path.split(os.path.abspath(__file__))[0] + '/trailers',
+        DOWNLOAD_PATH: os.path.split(os.path.abspath(__file__))[0] + '/trailers',
+        TRIVIA_INTRO: os.path.split(os.path.abspath(__file__))[0] + '/trivia_intro',
         TRIVIA: config.get(DEFAULT, TRIVIA),
-        TRIVIA_OUTRO: config.get(DEFAULT, TRIVIA_OUTRO),
-        THEATRE_INTRO: config.get(DEFAULT, THEATRE_INTRO),
-        TRAILERS_INTRO: config.get(DEFAULT, TRAILERS_INTRO),
-        COUNTDOWN: config.get(DEFAULT, COUNTDOWN),
-        FEATURE_PRESENTATION: config.get(DEFAULT, FEATURE_PRESENTATION)
+        TRIVIA_OUTRO: os.path.split(os.path.abspath(__file__))[0] + '/trivia_outro',
+        THEATRE_INTRO: os.path.split(os.path.abspath(__file__))[0] + '/theatre_intro',
+        TRAILERS_INTRO: os.path.split(os.path.abspath(__file__))[0] + '/trailers_intro',
+        SPONSOR_INTRO: os.path.split(os.path.abspath(__file__))[0] + '/sponsor_intro',
+        SPONSOR: os.path.split(os.path.abspath(__file__))[0] + '/sponsor',
+        COUNTDOWN: os.path.split(os.path.abspath(__file__))[0] + '/countdown',
+        FEATURE_PRESENTATION: os.path.split(os.path.abspath(__file__))[0] + '/feature_presentation'
     }
 
 
@@ -55,17 +58,16 @@ def addItems(selections, settings, key, count=1):
         if os.path.isfile(settings[key]):
             selections.append(settings[key])
         elif os.path.isdir(settings[key]):
-            for item in random.sample(os.listdir(settings[key]), count):
-                selections.append(settings[key] + '/' + item)
+            if len(os.listdir(settings[key])) > count:
+                for item in random.sample(glob.glob(os.path.join(settings[key], '*')), count):
+                    selections.append(item)
 
 
 def mix():
     # Settings
     settings = getSettings()
-
     # Make sure the download path exists
     if os.path.exists(settings[DOWNLOAD_PATH]):
-
         # Selections
         selections = []
 
@@ -81,6 +83,7 @@ def mix():
             addItems(selections, settings, SPONSOR)
             addItems(selections, settings, FEATURE_PRESENTATION)
 
+            print(str(','.join(selections)))
             # Add selected preroll trailers to Plex
             try:
                 plex = PlexServer(settings[PLEX_URL], settings[PLEX_TOKEN])
@@ -93,6 +96,7 @@ def mix():
 
         except ValueError as error:
             print('\033[91mERROR:\033[0m No trailers have been downloaded yet.')
+            print(error)
 
     else:
         print('\033[91mERROR:\033[0m No trailers have been downloaded yet.')

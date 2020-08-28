@@ -20,16 +20,9 @@ Edit the **settings.ini** file. Here you can add your url and token for Plex, re
 
 For each of these values, you can point to either a directory or a file. If pointing to a file, that file will be played every time. If pointing to a folder, a random video will be played from that folder. 
 
-* `trivia_intro` 
-* `trivia` 
-    * Plays a trivia video before trailers start like often seen in movie theatres. See my [PlexScripts](https://github.com/atnpgo/PlexScripts) repo, more specifically the `trivia-gen.sh`, `slide-to-vid.sh` and `slide-merger.sh` scripts, to see how to create your own.
-* `trivia_outro` 
-* `theatre_intro` 
-* `trailers_intro` 
-* `sponsor_intro` 
-* `sponsor` 
-* `countdown` 
-* `feature_presentation` 
+For the `trivia` config, see my [PlexScripts](https://github.com/atnpgo/PlexScripts) repo, more specifically the `trivia-gen.sh`, `slide-to-vid.sh` and `slide-merger.sh` scripts, to see how to create your own.
+Although any video should work.
+ 
 
 ## Usage
 
@@ -61,29 +54,29 @@ nopythonpath
 This is the order in which the video steps will be played:
 
 01. Trivia Intro
-    * Plays a video from the `trivia_intro` config 
+    * Plays a video from the `trivia_intro` folder 
 02. Trivia
     * Plays a video from the `trivia` config
 03. Trivia Outro
-    * Plays a video from the `trivia_outro` config
+    * Plays a video from the `trivia_outro` folder
 04. Theater Intro
-    * Plays a video from the `theatre_intro` config
+    * Plays a video from the `theatre_intro` folder
 05. Trailers Intro
-    * Plays a video from the `trailers_intro` config
+    * Plays a video from the `trailers_intro` folder
 06. Trailers
     * Plays `X` videos downloaded from the trailers website where `X` is the number specified in the `mix_number` config
 07. Sponsor Intro
-    * Plays a video from the `sponsor_intro` config
+    * Plays a video from the `sponsor_intro` folder
 08. Sponsor
-    * Plays a video from the `sponsor` config
+    * Plays a video from the `sponsor` folder
 09. Countdown Video
-    * Plays a video from the `countdown` config
+    * Plays a video from the `countdown` folder
 10. Feature Presentation Intro
-    * Plays a video from the `feature_presentation` config
+    * Plays a video from the `feature_presentation` folder
 11. Feature Presentation
     * The film you selected to play
     
-All steps except `Trailers` and `Feature Presentation` are optional. Simply leave the config value blank. 
+All steps except `Trailers` and `Feature Presentation` are optional. Simply leave the folders empty or the configuration blank. 
 
 ## Running For The First Time
 
