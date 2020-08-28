@@ -1,2 +1,0 @@
-# Python-PlexAPI (master branch)
-git+git://github.com/pkkid/python-plexapi.git@master#egg=plexapi
