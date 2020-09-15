@@ -17,11 +17,7 @@ You will need to install these yourself but the installations should be fairly s
 
 ## Settings
 Edit the **settings.ini** file. Here you can add your url and token for Plex, resolution settings, number of trailers to download, number of trailers to mix, and several optional video steps. 
-
-For the `trivia` config, see my [PlexScripts](https://github.com/atnpgo/PlexScripts) repo, more specifically the `trivia-gen.sh`, `slide-to-vid.sh` and `slide-merger.sh` scripts, to see how to create your own.
-Although any video should work.
  
-
 ## Usage
 
 ### Downloads
@@ -84,4 +80,9 @@ Since you just set up the scripts for the first time, you don't have any trailer
 python /path/to/scripts/download.py
 ```
 
-Enjoy!
+
+## Mixing trivia videos
+
+You can use the `trivia-gen.py` from my [PlexScripts](https://github.com/atnpgo/PlexScripts) repo to automatically create your own pre-show trivia/pre-show entertainment video from 
+a collection of slides and videos. Just like those that are projected before the movie starts in a theatre. 
+
